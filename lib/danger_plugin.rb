@@ -97,7 +97,7 @@ module Danger
         other_issues_count = issues.count - @max_num_violations if issues.count > @max_num_violations
         issues = issues.take(@max_num_violations)
       end
-      log "Received from Swiftlint: #{issues}"
+      log "Received from Swiftlint #{issues.count} issues"
 
       # Filter warnings and errors
       warnings = issues.select { |issue| issue['severity'] == 'Warning' }
@@ -245,10 +245,13 @@ module Danger
     #
     # @return [void]
     def send_inline_comment(results, method)
-      dir = "#{Dir.pwd}/"
+      dir = "#{Dir.pwd}/".gsub("/private", '') # This private removal is to avoid buddybuild issues
       results.each do |r|
-        filename = r['file'].gsub(dir, '')
-        send(method, r['reason'], file: filename, line: r['line'])
+        filename = r['file']
+        line = r['line']
+        reason = r['reason']
+        file = filename.gsub(dir, '')
+        send(method, reason, file: file, line: line)
       end
     end
 
